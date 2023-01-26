@@ -1,29 +1,24 @@
 import React, { useEffect, useState } from "react";
+import io from "socket.io-client";
 
 let socket;
-socket = io.connect("http://localhost:6010");
 
 const ChatBox = () => {
 	const [message, setMessage] = useState();
 	const [handle, setHandle] = useState();
 	const [chatBuddy, setChatBuddy] = useState();
+	const [msgFrmSrvr, setMsgFrmSrv] = useState();
 
-	// useEffect(() => {
-	// }, []);
-
-	//		// Query DOM
-	//		//const message = document.getElementById("message"),
-	//		//	handle = document.getElementById("handle"),
-	//		btn = document.getElementById("send"))
-	//	,
-	//		(btnJoin = document.getElementById("join")),
-	//		(output = document.getElementById("output")),
-	//		(feedback = document.getElementById("feedback")),
-	//		(chatBuddy = document.getElementById("to"));
+	useEffect(() => {
+		socket = io.connect("http://localhost:6010");
+		socket.on("connect", () => {
+			console.log("Connected to socket server");
+		});
+	}, []);
 
 	// Emit events
 
-	function joinFn(e) {
+	function joinChat(e) {
 		e.preventDefault();
 		socket.emit("join", {
 			handle: handle,
@@ -39,13 +34,18 @@ const ChatBox = () => {
 			chatBuddy: chatBuddy,
 			clientId: socket.id,
 		});
-		// message.value = "";
 	}
+	//let dataFrmSrvr = {};
+	useEffect(() => {
+		socket.on("chat", function (data) {
+			console.log("from server", data.message);
+			setMsgFrmSrv(data.message);
+		});
+	}, []);
 
-	const dataFromSrvr = socket.on("chat", function (data) {
-		// console.log(data.message);
-	});
-	console.log(dataFromSrvr);
+	// const mesFromSrvr = msgFrmSrvr.map((r) => {
+	// r.message;
+	// });
 	//message.addEventListener("keypress", function () {
 	//	socket.emit("typing", {
 	//		handle: handle.value,
@@ -68,7 +68,7 @@ const ChatBox = () => {
 	return (
 		<div>
 			<br />
-			<form onSubmit={joinFn}>
+			<form onSubmit={joinChat}>
 				<input
 					placeholder="username"
 					onChange={(e) => setHandle(e.target.value)}
@@ -93,6 +93,7 @@ const ChatBox = () => {
 				<br />
 				<input type="submit" value="Send" />
 			</form>
+			<span> {msgFrmSrvr}</span>
 		</div>
 	);
 };
