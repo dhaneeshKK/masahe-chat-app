@@ -8,6 +8,7 @@ const ChatBox = () => {
 	const [handle, setHandle] = useState();
 	const [chatBuddy, setChatBuddy] = useState();
 	const [msgFrmSrvr, setMsgFrmSrv] = useState();
+	const [msgFrm, setMsgFrm] = useState();
 
 	useEffect(() => {
 		socket = io.connect("http://localhost:6010");
@@ -40,6 +41,7 @@ const ChatBox = () => {
 		socket.on("chat", function (data) {
 			console.log("from server", data.message);
 			setMsgFrmSrv(data.message);
+			setMsgFrm(data.handle);
 		});
 	}, []);
 
@@ -93,7 +95,7 @@ const ChatBox = () => {
 				<br />
 				<input type="submit" value="Send" />
 			</form>
-			<span> {msgFrmSrvr}</span>
+			<span> {[`${msgFrm} : `, msgFrmSrvr]}</span>
 		</div>
 	);
 };
