@@ -36,7 +36,7 @@ const ChatBox = () => {
 			clientId: socket.id,
 		});
 	}
-	//let dataFrmSrvr = {};
+
 	useEffect(() => {
 		socket.on("chat", function (data) {
 			console.log("from server", data.message);
@@ -45,21 +45,11 @@ const ChatBox = () => {
 		});
 	}, []);
 
-	// const mesFromSrvr = msgFrmSrvr.map((r) => {
-	// r.message;
-	// });
 	//message.addEventListener("keypress", function () {
 	//	socket.emit("typing", {
 	//		handle: handle.value,
 	//		chatBuddy: to.value,
 	//	});
-	//});
-
-	// Listen for events
-	//socket.on("chat", function (data) {
-	//	// feedback.innerHTML = "";
-	//	output.innerHTML +=
-	//		"<p><strong>" + data.handle + ": </strong>" + data.message + "</p>";
 	//});
 
 	//socket.on("typing", function (data) {

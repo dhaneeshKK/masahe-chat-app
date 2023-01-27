@@ -59,8 +59,8 @@ io.on("connection", (socket) => {
 
 	// Handle chat event
 	socket.on("chat", function (data) {
-		console.log(roomList);
-		console.log(data.message);
+		//console.log(roomList);
+		//console.log(data.message);
 
 		roomList.forEach((element) => {
 			if (element.match(data.chatBuddy)) {
@@ -80,8 +80,5 @@ io.on("connection", (socket) => {
 				socket.to(roomToSend).emit("typing", data);
 			}
 		});
-	});
-	socket.on("disconnect", function (data) {
-		console.log(data.clientStatus);
 	});
 });
