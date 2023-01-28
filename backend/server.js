@@ -6,7 +6,15 @@ import cors from "cors";
 const app = express();
 const serverHttp = http.createServer(app);
 
+let conversationObj = [];
+
 app.use(cors());
+//mongo db
+import mongoose from "mongoose";
+import Conversation from "../backend/models/conversationModel.js";
+mongoose.connect(
+	"mongodb+srv://masahe:proj3ChatApp@cluster0.tyjub9p.mongodb.net/test"
+);
 
 serverHttp.listen(6010, () => {
 	console.log("listening on *:6010");
@@ -58,7 +66,7 @@ io.on("connection", (socket) => {
 	});
 
 	// Handle chat event
-	socket.on("chat", function (data) {
+	socket.on("chat", async function (data) {
 		//console.log(roomList);
 		//console.log(data.message);
 
@@ -70,6 +78,13 @@ io.on("connection", (socket) => {
 		});
 		//To send to all clients
 		//io.sockets.emit("chat", data);
+		//write to db
+		conversationObj.push({
+			sender: data.handle,
+			receiver: data.chatBuddy,
+			content: data.message,
+		});
+		await Conversation.create(conversationObj);
 	});
 
 	// Handle typing event

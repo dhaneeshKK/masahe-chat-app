@@ -58,7 +58,7 @@ const ChatBox = () => {
 	//});
 
 	return (
-		<div>
+		<div className="border-red-500">
 			<br />
 			<form onSubmit={joinChat}>
 				<input
