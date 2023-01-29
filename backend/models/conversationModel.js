@@ -5,10 +5,8 @@ const { Schema, model } = mongoose;
 const conversationSchema = Schema([
 	{
 		sender: { type: String },
-
-		content: { type: Array },
-
 		receiver: { type: String },
+		content: { type: Array },
 	},
 ]);
 const Conversation = model("Conversation", conversationSchema);

@@ -86,6 +86,7 @@ io.on("connection", (socket) => {
 			receiver: data.chatBuddy,
 			content: data.message,
 		});
+		console.log(conversationObj);
 		//await Conversation.create(conversationObj);
 		//conversationObj = [];
 
@@ -93,26 +94,35 @@ io.on("connection", (socket) => {
 			sender: { $in: data.handle },
 			receiver: { $in: data.chatBuddy },
 		});
-		convObjFrmDb.find(async (e) => {
-			if (e.sender === data.handle && e.receiver === data.chatBuddy) {
-				console.log("documet exist");
-				console.log(e._id);
-				await Conversation.updateOne(
-					{ _id: e.id },
-					{ $push: { content: data.message } }
-				);
-			} else {
-				await Conversation.create(conversationObj);
-			}
+		console.log(convObjFrmDb);
+		if (convObjFrmDb.length === 0) {
+			console.log("EMPTY");
+			await Conversation.create(conversationObj);
+		} else {
+			convObjFrmDb.find(async (e) => {
+				console.log("entedred FrmDb");
+				if (e.sender === data.handle && e.receiver === data.chatBuddy) {
+					console.log("documet exist");
+					console.log(e._id);
+					await Conversation.updateOne(
+						{ _id: e.id },
+						{
+							$push: {
+								content: data.message,
+							},
+						}
+					);
+				}
 
-			data = { message: e.content, handle: e.sender };
-			console.log(data);
-			socket.to(roomToSend).emit("chat", data);
+				data = { message: e.content, handle: e.sender };
+				console.log(data);
+				socket.to(roomToSend).emit("chat", data);
 
-			conversationObj = [];
-			convObjFrmDb = [];
-			//console.log(e.sender, e.receiver);
-		});
+				conversationObj = [];
+				convObjFrmDb = [];
+				//console.log(e.sender, e.receiver);
+			});
+		}
 	});
 
 	// Handle typing event
