@@ -84,45 +84,63 @@ io.on("connection", (socket) => {
 		conversationObj.push({
 			sender: data.handle,
 			receiver: data.chatBuddy,
-			content: data.message,
+			content: {
+				[data.handle]: data.message,
+			},
 		});
-		console.log(conversationObj);
+		console.log("conversation Obj", conversationObj);
 		//await Conversation.create(conversationObj);
 		//conversationObj = [];
 
 		let convObjFrmDb = await Conversation.find({
-			sender: { $in: data.handle },
-			receiver: { $in: data.chatBuddy },
+			sender: { $in: [data.handle, data.chatBuddy] },
+			receiver: { $in: [data.chatBuddy, data.handle] },
 		});
-		console.log(convObjFrmDb);
+		console.log("conv obj from DB", convObjFrmDb);
 		if (convObjFrmDb.length === 0) {
 			console.log("EMPTY");
 			await Conversation.create(conversationObj);
+			conversationObj = [];
+			convObjFrmDb = [];
 		} else {
 			convObjFrmDb.find(async (e) => {
 				console.log("entedred FrmDb");
-				if (e.sender === data.handle && e.receiver === data.chatBuddy) {
+				if (
+					(e.sender === data.handle && e.receiver === data.chatBuddy) ||
+					(e.sender === data.chatBuddy && e.receiver === data.handle)
+				) {
 					console.log("documet exist");
 					console.log(e._id);
 					await Conversation.updateOne(
 						{ _id: e.id },
 						{
 							$push: {
-								content: data.message,
+								content: { [data.handle]: data.message },
 							},
 						}
 					);
 				}
 
-				data = { message: e.content, handle: e.sender };
-				console.log(data);
-				socket.to(roomToSend).emit("chat", data);
+				// data = { message: e.content, handle: e.sender };
+				// console.log(data);
+				// socket.to(roomToSend).emit("chat", data);
 
 				conversationObj = [];
 				convObjFrmDb = [];
 				//console.log(e.sender, e.receiver);
 			});
 		}
+		//read from db and send to client
+		let convObjFrmDbToSend = await Conversation.find({
+			sender: { $in: [data.handle, data.chatBuddy] },
+			receiver: { $in: [data.chatBuddy, data.handle] },
+		});
+		convObjFrmDbToSend.map((e) => {
+			// console.log(e.content);
+			data = { message: e.content };
+		});
+		socket.to(roomToSend).emit("chat", data);
+		console.log(data);
 	});
 
 	// Handle typing event

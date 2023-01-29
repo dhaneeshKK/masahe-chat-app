@@ -40,8 +40,10 @@ const ChatBox = () => {
 	useEffect(() => {
 		socket.on("chat", function (data) {
 			console.log("from server", data.message);
-			setMsgFrmSrv(data.message);
-			setMsgFrm(data.handle);
+			console.log(JSON.stringify(data.message));
+			setMsgFrmSrv(JSON.stringify(data.message));
+			console.log(typeof msgFrmSrvr);
+			// setMsgFrm(data.handle);
 		});
 	}, []);
 
@@ -85,7 +87,14 @@ const ChatBox = () => {
 				<br />
 				<input type="submit" value="Send" />
 			</form>
-			<span> {[`${msgFrm} : `, msgFrmSrvr]}</span>
+			<span> {msgFrmSrvr}</span>
+			{/*<span>
+				{Object.keys(msgFrmSrvr).map((key) => (
+					<h4>
+						{key} : {msgFrmSrvr[key]}{" "}
+					</h4>
+				))}
+				</span>*/}
 		</div>
 	);
 };
