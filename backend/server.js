@@ -13,7 +13,8 @@ app.use(cors());
 import mongoose from "mongoose";
 import Conversation from "../backend/models/conversationModel.js";
 mongoose.connect(
-	"mongodb+srv://masahe:proj3ChatApp@cluster0.tyjub9p.mongodb.net/test"
+	"mongodb+srv://masahe:proj3ChatApp@cluster0.tyjub9p.mongodb.net/test",
+	console.log("Connected to db")
 );
 
 serverHttp.listen(6010, () => {
@@ -39,6 +40,7 @@ const io = new Server(serverHttp, {
 });
 
 let roomList = [];
+let roomToSend;
 io.on("connection", (socket) => {
 	console.log("made socket connection", socket.id);
 
@@ -72,8 +74,8 @@ io.on("connection", (socket) => {
 
 		roomList.forEach((element) => {
 			if (element.match(data.chatBuddy)) {
-				const roomToSend = element.replace(`${data.chatBuddy}`, "");
-				socket.to(roomToSend).emit("chat", data);
+				roomToSend = element.replace(`${data.chatBuddy}`, "");
+				//socket.to(roomToSend).emit("chat", data);
 			}
 		});
 		//To send to all clients
@@ -84,7 +86,33 @@ io.on("connection", (socket) => {
 			receiver: data.chatBuddy,
 			content: data.message,
 		});
-		await Conversation.create(conversationObj);
+		//await Conversation.create(conversationObj);
+		//conversationObj = [];
+
+		let convObjFrmDb = await Conversation.find({
+			sender: { $in: data.handle },
+			receiver: { $in: data.chatBuddy },
+		});
+		convObjFrmDb.find(async (e) => {
+			if (e.sender === data.handle && e.receiver === data.chatBuddy) {
+				console.log("documet exist");
+				console.log(e._id);
+				await Conversation.updateOne(
+					{ _id: e.id },
+					{ $push: { content: data.message } }
+				);
+			} else {
+				await Conversation.create(conversationObj);
+			}
+
+			data = { message: e.content, handle: e.sender };
+			console.log(data);
+			socket.to(roomToSend).emit("chat", data);
+
+			conversationObj = [];
+			convObjFrmDb = [];
+			//console.log(e.sender, e.receiver);
+		});
 	});
 
 	// Handle typing event
@@ -97,3 +125,11 @@ io.on("connection", (socket) => {
 		});
 	});
 });
+/*
+if (!)
+
+const cursor = db.collection('conversationObj').find({
+  sender: { $in: data.handle }
+});
+
+*/

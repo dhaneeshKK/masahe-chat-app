@@ -1,11 +1,12 @@
 import mongoose from "mongoose";
+mongoose.set("strictQuery", false);
 const { Schema, model } = mongoose;
 
-const conversationSchema = new Schema([
+const conversationSchema = Schema([
 	{
 		sender: { type: String },
 
-		content: { type: String, trim: true },
+		content: { type: Array },
 
 		receiver: { type: String },
 	},

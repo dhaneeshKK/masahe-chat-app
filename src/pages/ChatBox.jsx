@@ -7,7 +7,7 @@ const ChatBox = () => {
 	const [message, setMessage] = useState();
 	const [handle, setHandle] = useState();
 	const [chatBuddy, setChatBuddy] = useState();
-	const [msgFrmSrvr, setMsgFrmSrv] = useState();
+	const [msgFrmSrvr, setMsgFrmSrv] = useState([]);
 	const [msgFrm, setMsgFrm] = useState();
 
 	useEffect(() => {
