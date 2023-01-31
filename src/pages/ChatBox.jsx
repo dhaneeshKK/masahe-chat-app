@@ -7,8 +7,8 @@ const ChatBox = () => {
 	const [message, setMessage] = useState();
 	const [handle, setHandle] = useState();
 	const [chatBuddy, setChatBuddy] = useState();
-	const [msgFrmSrvr, setMsgFrmSrv] = useState([]);
-	const [msgFrm, setMsgFrm] = useState();
+	const [msgFrmSrvr, setMsgFrmSrvr] = useState([]);
+	const [onlineUsr, setOnlineUsr] = useState([]);
 
 	useEffect(() => {
 		socket = io.connect("http://localhost:6010");
@@ -40,10 +40,14 @@ const ChatBox = () => {
 	useEffect(() => {
 		socket.on("chat", function (data) {
 			console.log("from server", data.message);
-			console.log(JSON.stringify(data.message));
-			setMsgFrmSrv(JSON.stringify(data.message));
-			console.log(typeof msgFrmSrvr);
-			// setMsgFrm(data.handle);
+			setMsgFrmSrvr(data.message);
+		});
+	}, []);
+
+	useEffect(() => {
+		socket.on("onlineUsers", function (userList) {
+			console.log("online users", userList);
+			setOnlineUsr(userList);
 		});
 	}, []);
 
@@ -60,41 +64,67 @@ const ChatBox = () => {
 	//});
 
 	return (
-		<div className="border-red-500">
+		<div className="flex flex-col items-center  space-y-4 flex-wrap">
 			<br />
 			<form onSubmit={joinChat}>
 				<input
 					placeholder="username"
+					className="input input-bordered input-secondary w-full max-w-xs "
 					onChange={(e) => setHandle(e.target.value)}
 					//onInput={(e) => setHandle(e.target.value)}
 				/>
 
 				<br />
 				{/* <button onClick={() => joinFn()}>JOIN</button> */}
-				<input type="submit" value="Join" />
+				{/* <input type="submit" value="Join" /> */}
+				<button className="btn btn-primary" type="submit" value="Join">
+					Join
+				</button>
 			</form>
 			<form onSubmit={btn}>
 				<br />
 				<input
 					placeholder="chatBuddy"
+					className="input input-bordered input-secondary w-full max-w-xs"
 					onChange={(e) => setChatBuddy(e.target.value)}
 				/>
 				<br />
 				<input
 					placeholder="message"
+					className="input input-bordered input-secondary w-full max-w-xs"
 					onChange={(e) => setMessage(e.target.value)}
 				/>
 				<br />
-				<input type="submit" value="Send" />
+				{/* <input type="submit" value="Send" /> */}
+				<button className="btn btn-primary" type="submit" value="Send">
+					Send
+				</button>
 			</form>
-			<span> {msgFrmSrvr}</span>
-			{/*<span>
-				{Object.keys(msgFrmSrvr).map((key) => (
-					<h4>
-						{key} : {msgFrmSrvr[key]}{" "}
-					</h4>
-				))}
-				</span>*/}
+
+			<div className="card w-80 bg-neutral text-neutral-content">
+				<div className="card-body items-center text-center">
+					<h2 className="card-title">Chat</h2>
+					{/* <p>{msgFrmSrvr}</p> */}
+
+					{msgFrmSrvr &&
+						msgFrmSrvr.map((u) => (
+							<p>
+								{u.userName} : {u.msg}
+							</p>
+						))}
+
+					<div className="card-actions justify-end"></div>
+				</div>
+			</div>
+
+			<div className="card w-80 bg-neutral text-neutral-content">
+				<div className="card-body items-center text-center">
+					<h2 className="card-title">Online Users</h2>
+					<p>{onlineUsr}</p>
+
+					<div className="card-actions justify-end"></div>
+				</div>
+			</div>
 		</div>
 	);
 };

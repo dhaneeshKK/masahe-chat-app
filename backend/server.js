@@ -40,7 +40,7 @@ const io = new Server(serverHttp, {
 });
 
 let roomList = [];
-let roomToSend;
+let userList = [];
 io.on("connection", (socket) => {
 	console.log("made socket connection", socket.id);
 
@@ -50,8 +50,11 @@ io.on("connection", (socket) => {
 		const fromId = data.clientId + data.handle;
 		if (!roomList.find((val) => val === fromId)) {
 			roomList.push(fromId);
+			userList.push(data.handle);
 		}
 		console.log(roomList);
+		console.log("Online...", userList);
+		io.sockets.emit("onlineUsers", userList);
 	});
 
 	//remove from room array if disconnected
@@ -62,13 +65,20 @@ io.on("connection", (socket) => {
 			if (element.match(socket.id)) {
 				console.log("found", element);
 				roomList = arrayRemove(roomList, element);
+				const discUser = element.slice(20);
+				console.log("removed user", discUser);
+				userList = arrayRemove(userList, discUser);
 			}
 		});
+		io.sockets.emit("onlineUsers", userList);
 		console.log("after", roomList);
 	});
 
 	// Handle chat event
 	socket.on("chat", async function (data) {
+		let roomToSend;
+		let roomFrom;
+
 		//console.log(roomList);
 		//console.log(data.message);
 
@@ -77,7 +87,15 @@ io.on("connection", (socket) => {
 				roomToSend = element.replace(`${data.chatBuddy}`, "");
 				//socket.to(roomToSend).emit("chat", data);
 			}
+			console.log("Room to send", roomToSend);
 		});
+		roomList.forEach((element) => {
+			if (element.match(data.handle)) {
+				roomFrom = element.replace(`${data.handle}`, "");
+			}
+			console.log("from room", roomFrom);
+		});
+
 		//To send to all clients
 		//io.sockets.emit("chat", data);
 		//write to db
@@ -85,7 +103,8 @@ io.on("connection", (socket) => {
 			sender: data.handle,
 			receiver: data.chatBuddy,
 			content: {
-				[data.handle]: data.message,
+				userName: data.handle,
+				msg: data.message,
 			},
 		});
 		console.log("conversation Obj", conversationObj);
@@ -115,7 +134,7 @@ io.on("connection", (socket) => {
 						{ _id: e.id },
 						{
 							$push: {
-								content: { [data.handle]: data.message },
+								content: { userName: data.handle, msg: data.message },
 							},
 						}
 					);
@@ -139,25 +158,18 @@ io.on("connection", (socket) => {
 			// console.log(e.content);
 			data = { message: e.content };
 		});
-		socket.to(roomToSend).emit("chat", data);
-		console.log(data);
+		// socket.to([roomToSend, roomFrom]).emit("chat", data);
+		io.to(roomToSend).to(roomFrom).emit("chat", data);
+		//console.log(data);
 	});
 
-	// Handle typing event
-	socket.on("typing", function (data) {
-		roomList.forEach((element) => {
-			if (element.match(data.chatBuddy)) {
-				const roomToSend = element.replace(`${data.chatBuddy}`, "");
-				socket.to(roomToSend).emit("typing", data);
-			}
-		});
-	});
+	//// Handle typing event
+	//socket.on("typing", function (data) {
+	//	roomList.forEach((element) => {
+	//		if (element.match(data.chatBuddy)) {
+	//			const roomToSend = element.replace(`${data.chatBuddy}`, "");
+	//			socket.to(roomToSend).emit("typing", data);
+	//		}
+	//	});
+	//});
 });
-/*
-if (!)
-
-const cursor = db.collection('conversationObj').find({
-  sender: { $in: data.handle }
-});
-
-*/
