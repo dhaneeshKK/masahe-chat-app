@@ -17,6 +17,13 @@ const ChatBox = () => {
 		});
 	}, []);
 
+	useEffect(() => {
+		socket.on("onlineUsers", function (userList) {
+			console.log("online users", userList);
+			setOnlineUsr(userList);
+		});
+	});
+
 	// Emit events
 
 	function joinChat(e) {
@@ -49,7 +56,7 @@ const ChatBox = () => {
 			console.log("online users", userList);
 			setOnlineUsr(userList);
 		});
-	}, []);
+	}, [onlineUsr]);
 
 	//message.addEventListener("keypress", function () {
 	//	socket.emit("typing", {
@@ -83,11 +90,11 @@ const ChatBox = () => {
 			</form>
 			<form onSubmit={btn}>
 				<br />
-				<input
+				{/*<input
 					placeholder="chatBuddy"
 					className="input input-bordered input-secondary w-full max-w-xs"
 					onChange={(e) => setChatBuddy(e.target.value)}
-				/>
+	/>*/}
 				<br />
 				<input
 					placeholder="message"
@@ -117,10 +124,23 @@ const ChatBox = () => {
 				</div>
 			</div>
 
-			<div className="card w-80 bg-neutral text-neutral-content">
+			<div className="card w-80 bg-primary text-primary-content">
 				<div className="card-body items-center text-center">
 					<h2 className="card-title">Online Users</h2>
-					<p>{onlineUsr}</p>
+					<p>
+						{onlineUsr.map((e) => (
+							<ol>
+								{
+									<button
+										class="btn rounded-full"
+										onClick={() => setChatBuddy(e)}
+									>
+										{e}
+									</button>
+								}
+							</ol>
+						))}
+					</p>
 
 					<div className="card-actions justify-end"></div>
 				</div>
