@@ -59,7 +59,7 @@ io.on("connection", (socket) => {
 
 	//remove from room array if disconnected
 	socket.on("leave", () => {
-		console.log("user disconnected", socket.id);
+		console.log("user left chat", socket.id);
 		console.log("before", roomList);
 		roomList.forEach((element) => {
 			if (element.match(socket.id)) {
@@ -71,6 +71,23 @@ io.on("connection", (socket) => {
 			}
 		});
 		io.sockets.emit("onlineUsers", userList);
+		console.log(userList);
+		console.log("after", roomList);
+	});
+	socket.on("disconnect", () => {
+		console.log("user disconnected browser", socket.id);
+		console.log("before", roomList);
+		roomList.forEach((element) => {
+			if (element.match(socket.id)) {
+				console.log("found", element);
+				roomList = arrayRemove(roomList, element);
+				const discUser = element.slice(20);
+				console.log("removed user", discUser);
+				userList = arrayRemove(userList, discUser);
+			}
+		});
+		io.sockets.emit("onlineUsers", userList);
+		socket.broadcast.emit("onlineUsers", userList);
 		console.log(userList);
 		console.log("after", roomList);
 	});
