@@ -9,21 +9,34 @@ const ChatBox = () => {
 	const [chatBuddy, setChatBuddy] = useState();
 	const [msgFrmSrvr, setMsgFrmSrvr] = useState([]);
 	const [onlineUsr, setOnlineUsr] = useState([]);
-
+	const [socket, setSocket] = useState();
+	const [joined, setJoined] = useState(false);
 	useEffect(() => {
-		socket = io.connect("http://localhost:6010");
-		socket.on("connect", () => {
-			console.log("Connected to socket server");
-		});
-	}, []);
-
-	useEffect(() => {
-		socket.on("onlineUsers", function (userList) {
+		//setSocket(io.connect("http://localhost:6010"));
+		const newSocket = io.connect("http://localhost:6010");
+		setSocket(newSocket);
+		function usersOnline(userList) {
 			console.log("online users", userList);
 			setOnlineUsr(userList);
+		}
+		newSocket.on("onlineUsers", usersOnline);
+		newSocket.on("connect", () => {
+			console.log("Connected to socket server");
 		});
-	});
+		newSocket.on("chat", function (data) {
+			console.log("from server", data.message);
+			setMsgFrmSrvr(data.message);
+		});
+		return () => {
+			setSocket(null);
+			newSocket.removeAllListeners("connect");
+			newSocket.removeAllListeners("chat");
+			newSocket.off("onlineUsers", usersOnline);
+			console.log("un mouting componenet");
+		};
+	}, []);
 
+	console.log(onlineUsr);
 	// Emit events
 
 	function joinChat(e) {
@@ -32,6 +45,14 @@ const ChatBox = () => {
 			handle: handle,
 			clientId: socket.id,
 		});
+		setJoined(true);
+	}
+
+	function leaveChat(e) {
+		e.preventDefault();
+		socket.emit("leave", socket.id);
+		console.log("leaving chat");
+		setJoined(false);
 	}
 
 	function btn(e) {
@@ -44,101 +65,81 @@ const ChatBox = () => {
 		});
 	}
 
-	useEffect(() => {
-		socket.on("chat", function (data) {
-			console.log("from server", data.message);
-			setMsgFrmSrvr(data.message);
-		});
-	}, []);
-
-	useEffect(() => {
-		socket.on("onlineUsers", function (userList) {
-			console.log("online users", userList);
-			setOnlineUsr(userList);
-		});
-	}, [onlineUsr]);
-
-	//message.addEventListener("keypress", function () {
-	//	socket.emit("typing", {
-	//		handle: handle.value,
-	//		chatBuddy: to.value,
-	//	});
-	//});
-
-	//socket.on("typing", function (data) {
-	//	feedback.innerHTML =
-	//		"<p><em>" + data.handle + " is typing a message...</em></p>";
-	//});
-
 	return (
-		<div className="flex flex-col items-center  space-y-4 flex-wrap">
+		<div className="flex flex-row items-center  space-y-4 flex-wrap">
 			<br />
-			<form onSubmit={joinChat}>
-				<input
-					placeholder="username"
-					className="input input-bordered input-secondary w-full max-w-xs "
-					onChange={(e) => setHandle(e.target.value)}
-					//onInput={(e) => setHandle(e.target.value)}
-				/>
+			<div className="flex flex-col items-center flex-wrap">
+				<form onSubmit={!joined ? joinChat : leaveChat}>
+					<input
+						placeholder="username"
+						className="input input-bordered input-secondary w-full max-w-xs "
+						onChange={(e) => setHandle(e.target.value)}
+						//onInput={(e) => setHandle(e.target.value)}
+					/>
 
-				<br />
-				{/* <button onClick={() => joinFn()}>JOIN</button> */}
-				{/* <input type="submit" value="Join" /> */}
-				<button className="btn btn-primary" type="submit" value="Join">
-					Join
-				</button>
-			</form>
-			<form onSubmit={btn}>
-				<br />
-				{/*<input
+					<br />
+					{/* <button onClick={() => joinFn()}>JOIN</button> */}
+					{/* <input type="submit" value="Join" /> */}
+					{/* <button className="btn btn-primary" type="submit" value="Join"> */}
+					{/* Join */}
+					{/* </button> */}
+
+					<button className="btn btn-primary">
+						{!joined ? "Join Chat " : "Leave Chat"}
+					</button>
+				</form>
+
+				<div className="card w-80 bg-neutral text-neutral-content">
+					<div className="card-body items-center text-center">
+						<h2 className="card-title">Chat</h2>
+						{/* <p>{msgFrmSrvr}</p> */}
+
+						{msgFrmSrvr &&
+							msgFrmSrvr.map((u) => (
+								<p>
+									{u.userName} : {u.msg}
+								</p>
+							))}
+
+						<div className="card-actions justify-end"></div>
+					</div>
+				</div>
+
+				<form onSubmit={btn}>
+					<br />
+					{/*<input
 					placeholder="chatBuddy"
 					className="input input-bordered input-secondary w-full max-w-xs"
 					onChange={(e) => setChatBuddy(e.target.value)}
 	/>*/}
-				<br />
-				<input
-					placeholder="message"
-					className="input input-bordered input-secondary w-full max-w-xs"
-					onChange={(e) => setMessage(e.target.value)}
-				/>
-				<br />
-				{/* <input type="submit" value="Send" /> */}
-				<button className="btn btn-primary" type="submit" value="Send">
-					Send
-				</button>
-			</form>
-
-			<div className="card w-80 bg-neutral text-neutral-content">
-				<div className="card-body items-center text-center">
-					<h2 className="card-title">Chat</h2>
-					{/* <p>{msgFrmSrvr}</p> */}
-
-					{msgFrmSrvr &&
-						msgFrmSrvr.map((u) => (
-							<p>
-								{u.userName} : {u.msg}
-							</p>
-						))}
-
-					<div className="card-actions justify-end"></div>
-				</div>
+					<br />
+					<input
+						placeholder="message"
+						className="input input-bordered input-secondary w-full max-w-xs"
+						onChange={(e) => setMessage(e.target.value)}
+					/>
+					<br />
+					{/* <input type="submit" value="Send" /> */}
+					<button className="btn btn-primary" type="submit" value="Send">
+						Send
+					</button>
+				</form>
 			</div>
-
-			<div className="card w-80 bg-primary text-primary-content">
+			<div className="card w-40 bg-primary text-primary-content">
 				<div className="card-body items-center text-center">
 					<h2 className="card-title">Online Users</h2>
 					<p>
 						{onlineUsr.map((e) => (
-							<ol>
+							<>
 								{
 									<button
-										class="btn rounded-full"
+										className="btn rounded-full"
 										onClick={() => setChatBuddy(e)}
 									>
 										{e}
 									</button>
 								}
-							</ol>
+							</>
 						))}
 					</p>
 

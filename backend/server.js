@@ -58,7 +58,7 @@ io.on("connection", (socket) => {
 	});
 
 	//remove from room array if disconnected
-	socket.on("disconnect", () => {
+	socket.on("leave", () => {
 		console.log("user disconnected", socket.id);
 		console.log("before", roomList);
 		roomList.forEach((element) => {
@@ -71,6 +71,7 @@ io.on("connection", (socket) => {
 			}
 		});
 		io.sockets.emit("onlineUsers", userList);
+		console.log(userList);
 		console.log("after", roomList);
 	});
 
