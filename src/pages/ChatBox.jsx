@@ -63,87 +63,127 @@ const ChatBox = () => {
 			chatBuddy: chatBuddy,
 			clientId: socket.id,
 		});
+		e.target.reset();
 	}
 
 	return (
-		<div className="flex flex-row items-center  space-y-4 flex-wrap">
-			<br />
-			<div className="flex flex-col items-center flex-wrap">
-				<form onSubmit={!joined ? joinChat : leaveChat}>
-					<input
-						placeholder="username"
-						className="input input-bordered input-secondary w-full max-w-xs "
-						onChange={(e) => setHandle(e.target.value)}
-						//onInput={(e) => setHandle(e.target.value)}
-					/>
+		<div>
+			Home
+			<label htmlFor="my-modal-3" className="btn">
+				Open Chat
+			</label>
+			{/* Put this part before </body> tag */}
+			<input type="checkbox" id="my-modal-3" className="modal-toggle" />
+			<div className="modal modal-bottom sm:modal-middle">
+				<div className="modal-box ">
+					<label
+						htmlFor="my-modal-3"
+						className="btn btn-sm btn-circle absolute right-2 top-2"
+					>
+						✕
+					</label>
 
-					<br />
-					{/* <button onClick={() => joinFn()}>JOIN</button> */}
-					{/* <input type="submit" value="Join" /> */}
-					{/* <button className="btn btn-primary" type="submit" value="Join"> */}
-					{/* Join */}
-					{/* </button> */}
+					<div>
+						<div className="flex flex-row items-center  space-y-4 flex-wrap">
+							<br />
+							<div className="flex flex-col items-center flex-wrap">
+								<form onSubmit={!joined ? joinChat : leaveChat}>
+									<input
+										placeholder="username"
+										className="input input-bordered input-secondary w-full max-w-xs "
+										onChange={(e) => setHandle(e.target.value)}
+										//onInput={(e) => setHandle(e.target.value)}
+									/>
 
-					<button className="btn btn-primary">
-						{!joined ? "Join Chat " : "Leave Chat"}
-					</button>
-				</form>
+									<br />
+									{/* <button onClick={() => joinFn()}>JOIN</button> */}
+									{/* <input type="submit" value="Join" /> */}
+									{/* <button className="btn btn-primary" type="submit" value="Join"> */}
+									{/* Join */}
+									{/* </button> */}
 
-				<div className="card w-80 bg-neutral text-neutral-content">
-					<div className="card-body items-center text-center">
-						<h2 className="card-title">Chat</h2>
-						{/* <p>{msgFrmSrvr}</p> */}
+									<button className="btn btn-primary">
+										{!joined ? "Join Chat " : "Leave Chat"}
+									</button>
+								</form>
 
-						{msgFrmSrvr &&
-							msgFrmSrvr.map((u) => (
-								<p>
-									{u.userName} : {u.msg}
-								</p>
-							))}
+								<div className="card w-80 bg-neutral text-neutral-content">
+									<div className="card-body items-center text-center">
+										<h2 className="card-title">Chat</h2>
+										{/* <p>{msgFrmSrvr}</p> */}
 
-						<div className="card-actions justify-end"></div>
-					</div>
-				</div>
+										{msgFrmSrvr &&
+											msgFrmSrvr.map((u) => (
+												<p>
+													{u.userName} : {u.msg}
+												</p>
+											))}
 
-				<form onSubmit={btn}>
-					<br />
-					{/*<input
+										<div className="card-actions justify-end"></div>
+									</div>
+								</div>
+
+								<form onSubmit={btn}>
+									<br />
+									{/*<input
 					placeholder="chatBuddy"
 					className="input input-bordered input-secondary w-full max-w-xs"
 					onChange={(e) => setChatBuddy(e.target.value)}
 	/>*/}
-					<br />
-					<input
-						placeholder="message"
-						className="input input-bordered input-secondary w-full max-w-xs"
-						onChange={(e) => setMessage(e.target.value)}
-					/>
-					<br />
-					{/* <input type="submit" value="Send" /> */}
-					<button className="btn btn-primary" type="submit" value="Send">
-						Send
-					</button>
-				</form>
-			</div>
-			<div className="card w-40 bg-primary text-primary-content">
-				<div className="card-body items-center text-center">
-					<h2 className="card-title">Online Users</h2>
-					<p>
-						{onlineUsr.map((e) => (
-							<>
-								{
+									<br />
+									<input
+										placeholder="message"
+										className="input input-bordered input-secondary w-full max-w-xs"
+										onChange={(e) => setMessage(e.target.value)}
+									/>
+									<br />
+									{/* <input type="submit" value="Send" /> */}
 									<button
-										className="btn rounded-full"
-										onClick={() => setChatBuddy(e)}
+										className="btn btn-primary"
+										type="submit"
+										value="Send"
 									>
-										{e}
+										Send
 									</button>
-								}
-							</>
-						))}
-					</p>
+								</form>
+							</div>
+							{/*    */}
 
-					<div className="card-actions justify-end"></div>
+							<div className="collapse">
+								<input type="checkbox" />
+								<div className="collapse-title text-xl font-medium">
+									Online Users
+								</div>
+								<div className="collapse-content">
+									{/*    */}
+
+									<div className="card w-40 bg-primary text-primary-content">
+										<div className="card-body items-center text-center">
+											{/* <h2 className="card-title">Online Users</h2> */}
+											<p>
+												{onlineUsr.map((e) => (
+													<>
+														{
+															<button
+																className="btn rounded-full"
+																onClick={() => setChatBuddy(e)}
+															>
+																{e}
+															</button>
+														}
+													</>
+												))}
+											</p>
+
+											<div className="card-actions justify-end"></div>
+										</div>
+									</div>
+									{/*    */}
+								</div>
+							</div>
+							{/*    */}
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
